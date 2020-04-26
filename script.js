@@ -135,9 +135,11 @@ const voiceCommands = [
     {
         title: "search shows for _",
         regex: /search shows for (.*)/gi,
-        fn: (matches) =>
+        fn: (matches) => {
             //DO a search
+            switchToShowsListing();
             runShowSearchForText(matches[1])
+        }
 
     },
     {
@@ -376,6 +378,7 @@ function makePageForEpisodes(json) {
         const card = makeCardForEpisode(episode);
         container.appendChild(card);
     });
+    scrollToTop();
 }
 
 function makePageForShows(json) {
@@ -391,6 +394,7 @@ function makePageForShows(json) {
         const card = makeCardForShow(show);
         showsListElem.appendChild(card);
     });
+    scrollToTop();
 }
 
 function scrollToTop() {

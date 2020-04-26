@@ -83,7 +83,6 @@ button,
 
 .card:hover {
   box-shadow: 2px 8px 45px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
 }
 
 @media screen and (min-width: 600px) {
@@ -214,8 +213,9 @@ header h1 {
   min-width: 80%;
 }
 
+/* basics of modal dialog taken from: https://css-tricks.com/considerations-styling-modal/ */
 #voiceCommandsHelpDialog {
-  border: 5px solid green;
+  border: 5px solid black;
 }
 
 .modal {
