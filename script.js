@@ -81,9 +81,7 @@ function registerSpeechRecognitionListener(processPhraseCallback) {
 }
 
 
-
-
-const commands = [
+const voiceCommands = [
     {
         title: "show everything",
         regex: /show(?: me)? everything|show all shows/gi,
@@ -127,11 +125,19 @@ const commands = [
         },
     },
     {
-        title: "show episodes containing _",
-        regex: /show(?: me)? episodes containing (.*)/gi,
+        title: "search episodes for _",
+        regex: /search episodes for (.*)/gi,
         fn: (matches) =>
             //DO a search
             runEpisodeSearchForText(matches[1])
+
+    },
+    {
+        title: "search shows for _",
+        regex: /search shows for (.*)/gi,
+        fn: (matches) =>
+            //DO a search
+            runShowSearchForText(matches[1])
 
     },
     {
@@ -148,23 +154,43 @@ const commands = [
 
     },
     {
-        title: "What can i say?",
-        regex: /what can i say/gi,
+        title: "Help|What can i say?",
+        regex: /what can i say|help/gi,
         //display help dialog of what can be said
         fn: (matches) =>
-            console.log(
-                "You can say: \n",
-                commands.map((c) => c.title).join("\n")
-            ),
+            displayVoiceHelpDialog()
+    },
+    {
+        title: "dismiss|Hide the help",
+        regex: /dismiss|hide the help/gi,
+        //hide help dialog of what can be said
+        fn: (matches) =>
+            hideVoiceHelpDialog()
     },
 
 ];
+function displayVoiceHelpDialog() {
+    const dialog = document.getElementById("voiceCommandsHelpDialog");
+    dialog.hidden = false;
+    const listEl = dialog.querySelector("ul")
+    listEl.textContent = "";
+    voiceCommands.map((c) => {
+        const el = listEl.appendChild(document.createElement("li"))
+        el.textContent = c.title;
+    });
+}
 
+function hideVoiceHelpDialog() {
+    console.log("hiding voice command help dialog")
+    document.getElementById("voiceCommandsHelpDialog").hidden = true;
+
+}
 function processCommand(transcript) {
-    let el = document.body.appendChild(document.createElement("div"));
-    el.innerText = "processing cmd: " + transcript;
+    let els = document.querySelectorAll(".words");
+    els.forEach(el => el.textContent = "Cmd: " + transcript);
 
-    const matchedCmd = commands.find(
+
+    const matchedCmd = voiceCommands.find(
         (cmd) => [...transcript.matchAll(cmd.regex)].length > 0
     );
     if (matchedCmd) {
@@ -222,6 +248,12 @@ function runEpisodeSearchForText(soughtText) {
     );
     makePageForEpisodes(filtered);
 }
+function runShowSearchForText(soughtText) {
+    const filtered = allShows.filter(show =>
+        tvShowMatchesQuery(show, soughtText)
+    );
+    makePageForShows(filtered);
+}
 
 function showSeason(seasonNumber) {
     //don't do this if we haven't a show selected.
@@ -262,7 +294,7 @@ function handleChosenEpisode(event) {
         return;
     }
     let id = opts[0].value;
-    selectChosenEpisodeById(id);
+    selectChosenEpisodeById(Number(id));
 }
 function selectChosenEpisodeById(id) {
     if (allEpisodes) {
@@ -317,7 +349,7 @@ function makeEpisodeSelector(episodes) {
         //<option value="S01E01">S01E01 Winter is Coming</option>;
         const optionElem = document.createElement("option");
         const code = makeEpisodeCode(episode);
-        optionElem.setAttribute("value", code);
+        optionElem.setAttribute("value", episode.id);
         optionElem.textContent = `${code} - ${episode.name}`;
         selectElem.appendChild(optionElem);
     });
