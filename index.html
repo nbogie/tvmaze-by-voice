@@ -2,112 +2,60 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Speech Detection control of tv show dom project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>TV Show DOM - Level 500 - Sample Solution</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:wght@700&family=Merriweather&display=swap"
+      rel="stylesheet"
+    />
+
+    <link href="style.css" rel="stylesheet" />
   </head>
+
   <body>
-    <div class="words" contenteditable></div>
+    <div id="root">
+      <div id="episodesPage">
+        <header>
+          <div id="listShowsLink">Back to all shows</div>
+          <h1 id="showTitleHeader">Breaking Bad</h1>
+        </header>
+        <div id="controls">
+          <select id="episodeSelect"></select>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="your search term..."
+          />
+          <span id="countDisplay">Displaying n episodes</span>
+          <div class="words" contenteditable>Spoken words will come here</div>
+        </div>
+        <div id="episodes"></div>
+      </div>
 
-    <script>
-      function registerSpeechRecognitionListener(processPhraseCallback) {
-        //based on code demoed at this wes bos talk
-        //https://www.youtube.com/watch?v=pws4qzGn5ak
+      <div id="showsPage">
+        <header></header>
+        <div id="controlPanel">
+          <span class="control">Filtering for </span
+          ><input
+            id="showsSearchInput"
+            class="control"
+            type="text"
+            placeholder="search for a show"
+            value="mystery"
+          />
+          <div class="control" id="filterSummary">?</div>
+          <select id="showSelect"></select>
+          <div class="words" contenteditable>Spoken words will come here</div>
+        </div>
+        <div>
+          <ul id="showsList"></ul>
+        </div>
+      </div>
+    </div>
 
-        //Create the speech recognition object
-        window.SpeechRecognition =
-          window.SpeechRecognition || window.webkitSpeechRecognition;
-
-        const recognition = new SpeechRecognition();
-        recognition.interimResults = true;
-        recognition.lang = "en-GB";
-
-        let p = document.createElement("p");
-        const words = document.querySelector(".words");
-        words.appendChild(p);
-
-        recognition.addEventListener("result", (e) => {
-          const transcript = Array.from(e.results)
-            .map((result) => result[0]) //just the highest confidence guess
-            .map((result) => result.transcript)
-            .join("");
-
-          p.textContent = transcript;
-
-          if (e.results[0].isFinal) {
-            processPhraseCallback(transcript);
-            //when exactly is isFinal set?
-          }
-        });
-
-        //only if we want to keep going after first phrase end is detected
-        recognition.addEventListener("end", recognition.start);
-        recognition.start();
-      }
-
-      registerSpeechRecognitionListener(processCommand);
-      console.log("started recognition tool");
-
-      const commands = [
-        {
-          title: "show all episodes",
-          regex: /show all episodes/gi,
-          fn: (matches) =>
-            //show all episodes (remove any filter)
-            console.log("Would show all episodes"),
-        },
-        {
-          title: "Show season _ episode _",
-          regex: /season (\d+) episode (\d+)/gi,
-          fn: (matches) =>
-            //DO an episode change
-            console.log(`present episode S${matches[1]}E${matches[2]}`),
-        },
-        {
-          title: "Show season _",
-          regex: /show season (\d+)/gi,
-          fn: (matches) =>
-            //DO a filtering of episodes
-            console.log("present all episodes in season number: " + matches[1]),
-        },
-        {
-          title: "...episodes containing _",
-          regex: /show episodes containing (.*)/gi,
-          fn: (matches) =>
-            //DO a search
-            console.log("search episodes for keyword: " + matches[1]),
-        },
-        {
-          title: "What can i say?",
-          regex: /what can i say/gi,
-          //display help dialog of what can be said
-          fn: (matches) =>
-            console.log(
-              "You can say: \n",
-              commands.map((c) => c.title).join("\n")
-            ),
-        },
-      ];
-
-      function processCommand(transcript) {
-        let el = document.body.appendChild(document.createElement("div"));
-        el.innerText = "processing cmd: " + transcript;
-
-        const matchedCmd = commands.find(
-          (cmd) => [...transcript.matchAll(cmd.regex)].length > 0
-        );
-        if (matchedCmd) {
-          let matches = [...transcript.matchAll(matchedCmd.regex)];
-          if (matches.length > 0) {
-            console.log("got a match.  matches are: ", matches[0]);
-            console.log(matchedCmd.fn(matches[0]));
-          } else {
-            console.error(
-              "cmd was selected but then doesn't match. suspect code error."
-            );
-          }
-        } else {
-          ("no command matches that");
-        }
-      }
-    </script>
+    <script src="shows.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>
